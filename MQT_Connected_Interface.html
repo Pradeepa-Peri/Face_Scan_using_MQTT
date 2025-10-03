@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #e0f2fe, color: #374151;
+ #f3f4f6);
+                       padding: 2.5rem;
+        {
+            max }
+        .container-width: 1024px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2.5rem;
+            border-radius:  overflow: hidden0.5rem;
+           ;
+        }
+        th, td {
+            padding: 1rem;
+            border7eb;
+           : 1px solid #e5e text-align: left;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        tr:hover {
+            background-color: #eff6ff;
+        }
+        .decision-granted {
+            color: #10b981;
+            font-weight: 600;
+        }
+        .decision-denied {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .decision-late {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        .summary-item {
+            margin-bottom: 0.75rem;
+            font-size: 1.125rem;
+            color: #4b5563;
+        }
+        .summary-item strong {
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Student Attendance Dashboard</h1>
+
+        <div class="text-center text-sm mb-6 text-gray-600">
+            🔌 Connected to MQTT Broker on <strong>{{ config['MQTT_BROKER_URL'] }}</strong>
+        </div>
+
+        <div class="text-center text-sm mb-6 text-gray-600">
+           decision-granted ✅ <span class="">Granted</span>: Full credit &nbsp;&nbsp;
+            🕒 <span class="decision-late">Late</span>: Half credit &nbsp;&nbsp;
+            ❌ <span class="decision-denied">Denied</span>: No credit
+        </div>
+
+        {% for student_id, data in summary.items() %}
+            <h2>👤 {{ student_id }}</h2>
+            <div class="summary-item">
+                <strong>Attendance Credit:</strong> {{ "%.1f"|format(data.classes_attended) }} / {{ data.total_classes }}
+            </div>
+            <div class="summary-item">
+                <strong>Attendance Rate:</strong>
+                <span class="font-bold {% if data.attendance_rate >= 80 %}text-green-600
+                    {% elif data.attendance_rate >= 50 %}text-yellow-600{% else %}text-red-600
+                    {% endif %}">
+                    {{ data.attendance_rate }}%
+                </span>
+            </div>
+
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Timestamp</th>
+                        <th>Decision</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for record in data.details %}
+                        <tr class="{% if record.decision in ['granted', 'late'] %}bg-green-50{% endif %}">
+                            <td>{{ record.location }}</td>
+                            <td>{{ record.timestamp }}</td>
+                            <td class="{% if record.decision == 'granted' %}decision-granted{% elif record.decision == 'denied' %}decision-denied{% else %}decision-late{% endif %}">
+                                {{ record.decision }}
+                            </td>
+                            <td>{{ record.reason }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    </div>
+</body>
+</html>
